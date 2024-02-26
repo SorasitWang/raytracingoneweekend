@@ -63,7 +63,7 @@ public:
         if (image.height() <= 0) return color(0, 1, 1);
         
         auto pixelColor = image.pixel_color(u, v);
-        //std::cout << pixelColor[0]<< " " <<  pixelColor[1] << " " << pixelColor[2] << std::endl;
+
         return color(pixelColor[0], pixelColor[1], pixelColor[2]);
     }
 

@@ -77,7 +77,7 @@ public:
         if (data == nullptr) return noDataColor;
         
         if (u < 0 || u > 1 || v < 0 || v > 1) {
-            // std::cout << u << " " << v << std::endl;
+
             if (wrapMethod == WrapMethod::ClampToEdge) {
                 u = Util::clamp(u, 0.0, 1.0);
                 v = Util::clamp(v, 0.0, 1.0);

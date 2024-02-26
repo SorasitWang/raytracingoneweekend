@@ -74,9 +74,8 @@ color Camera::rayColor(const ray& r, int depth, const Hittable& world) const {
                 ScatteredRay s = scattered[i];
                 color tmp = rayColor(s.r, depth - 1, world);
                 accuColor += s.coeff * tmp;
-
             }
-
+ 
             accuColor = accuColor * attenuation;
             return accuColor + colorFromEmission;
         }
@@ -85,7 +84,6 @@ color Camera::rayColor(const ray& r, int depth, const Hittable& world) const {
     else {
         return background;
     }
-
 }
 
 point3 Camera::defocus_disk_sample() const {

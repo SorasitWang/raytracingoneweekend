@@ -26,7 +26,7 @@ namespace Reader {
 		if (!file)
 			throw std::runtime_error( fileName + " Not found" );
 
-		std::vector<Triangle> faceList;
+		std::vector<Triangle*> faceList;
 		std::string line;
 		std::string xx, yy, zz;
 		
@@ -57,10 +57,11 @@ namespace Reader {
 					f v1/vt1/vn1 v2/vt2/vn2 v3/vt3/vn3
 				*/
 				std::vector<point3> verticesOneTriangle;
-				size_t normalIdx = -1, vertexIdx = -1, uvIdx = -1;
+				int normalIdx = -1;
+				size_t vertexIdx = -1, uvIdx = -1;
 
 				for (std::string s : { xx, yy, zz }) {
-
+					
 					size_t prev = 0, current = 0;
 					current = s.find("/", prev);
 					
@@ -69,15 +70,13 @@ namespace Reader {
 
 					std::string faceStr = s.substr(prev, current);
 					vertexIdx = stoi(faceStr);
-
 					verticesOneTriangle.push_back(vertices.at(vertexIdx - 1));
-
+					
 					if (current == s.size())
 						continue;
 				
 					prev = current;
 					current = s.find("/", prev+1);					
-					
 					if (current == std::string::npos) {
 						current = s.size();
 						std::string uvStr = s.substr(prev+1, current);
@@ -86,16 +85,20 @@ namespace Reader {
 					}
 
 					prev = current+1;
-					std::string normalStr = s.substr(prev, s.size() - 1);
+					std::string normalStr = s.substr(prev+1, s.size() - 1);
 
 					normalIdx = stoi(normalStr);
 				}
 				//	Assume that every vertex's normal are equal
-				if (normalIdx != -1)
-					faceList.push_back(Triangle(verticesOneTriangle.data(), normals[normalIdx-1]));
-				else
-					faceList.push_back(Triangle(verticesOneTriangle.data()));
+				if (normalIdx != -1) {
+					faceList.push_back(	new Triangle(verticesOneTriangle.data(),
+										vertices.at(vertexIdx - 1)) );
+				}
+				else {
+					faceList.push_back(new Triangle(verticesOneTriangle.data()));
+				}
 			}
+			
 		}
 
 		file.close();

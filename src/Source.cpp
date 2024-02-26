@@ -22,25 +22,27 @@
 
 #include "texture.h"
 
+Camera cam;
 
-void earth(std::ofstream& out ) {
-    auto earth_texture = make_shared<image_texture>("/textures/earthmap.jpg");
-    auto earth_surface = make_shared<lambertian>(earth_texture);
-    auto globe = make_shared<Sphere>(point3(0, 0, 0), 2, earth_surface);
-
-    Camera cam;
+void setupCamera() {
+    cam.vup = vec3(0, 1, 0);
+    cam.background = color(0.70, 0.80, 1.00);
 
     cam.aspect_ratio = 16.0 / 9.0;
     cam.image_width = 400;
     cam.samples_per_pixel = 10;
-    cam.max_depth = 10;
+}
 
+
+void earth(std::ofstream& out ) {
+    auto earth_texture = make_shared<image_texture>("textures/earthmap.jpg");
+    auto earth_surface = make_shared<lambertian>(earth_texture);
+    auto globe = make_shared<Sphere>(point3(0, 0, 0), 2, earth_surface);
+
+    cam.max_depth = 10;
     cam.vfov = 20;
     cam.lookfrom = point3(0, 0, 12);
     cam.lookat = point3(0, 0, 0);
-    cam.vup = vec3(0, 1, 0);
-
-    cam.defocus_angle = 0;
 
     cam.render(out, HittableList(globe));
 }
@@ -69,18 +71,18 @@ void randomSpheres( std::ofstream &out) {
     }
 
     auto checker = make_shared<checker_texture>(0.32, color(.2, .3, .1), color(.9, .9, .9));
-    //world.add(make_shared<Sphere>(point3(0, -1000, 0), 1000, make_shared<lambertian>(checker)));
+    world.add(make_shared<Sphere>(point3(0, -1000, 0), 1000, make_shared<lambertian>(checker)));
     world.add(make_shared<Sphere>(point3(0.0, -102, -1.0), 100.0, material_ground));
     Sphere s = Sphere(point3(0.0, 0.0, -1.0), 0.5, material_center);
     TransformMatrix tMat;
     tMat.translate(vec3(0, 1, 0));
    
     world.add(make_shared<trs>(make_shared<Sphere>(s), tMat));
-    // world.add(make_shared<Sphere>(point3(0.0, 0.0, -1.0), 0.5, material_center);
+    world.add(make_shared<Sphere>(point3(0.0, 0.0, -1.0), 0.5, material_center));
 
-    /*world.add(make_shared<Sphere>(point3(-1.0, 0.0, -1.0), 0.5, material_left));
+    world.add(make_shared<Sphere>(point3(-1.0, 0.0, -1.0), 0.5, material_left));
     world.add(make_shared<Sphere>(point3(-1.0, 0.0, -1.0), -0.4, material_left));
-    world.add(make_shared<Sphere>(point3(1.0, 0.0, -1.0), 0.5, material_right));*/
+    world.add(make_shared<Sphere>(point3(1.0, 0.0, -1.0), 0.5, material_right));
 
     for (int a = -5; a < 5; a++) {
         for (int b = -1; b < 1; b++) {
@@ -90,32 +92,32 @@ void randomSpheres( std::ofstream &out) {
             if ((center - point3(4, 0.2, 0)).length() > 0.9) {
                 shared_ptr<material> sphere_material;
 
-                if (choose_mat < 0.8) {
+                if (choose_mat < 0.5) {
                     // diffuse
                     auto albedo = color::random() * color::random();
                     sphere_material = make_shared<lambertian>(albedo);
                     auto center2 = center + vec3(0, Util::random_double(0, .5), 0);
-                    //world.add(make_shared<Sphere>(std::vector<point3>({ center, center2 }), 0.2, sphere_material));
+                    world.add(make_shared<Sphere>(std::vector<point3>({ center, center2 }), 0.2, sphere_material));
+                }
+                else {
+                    // metal
+                    sphere_material = make_shared<metal>(color::random(),0.3);
+                    auto center2 = center + vec3(0, Util::random_double(0, .5), 0);
+                    world.add(make_shared<Sphere>(std::vector<point3>({ center, center2 }), 0.2, sphere_material));
                 }
             }
         }
     }
 
     //  Render
-    Camera cam;
 
-    cam.aspect_ratio = 1;
-    cam.image_width = 200;
-    cam.samples_per_pixel = 5;
     cam.max_depth = 2;
     cam.samplingMethod = SamplingMethod::SuperSampling;
 
     cam.vfov = 90;
     cam.lookfrom = point3(1.5, 2, 2);
     cam.lookat = point3(0, 0, -1);
-    cam.vup = vec3(0, 1, 0);
 
-    cam.defocus_angle = 0.0;
     cam.focus_dist = 3.4;
     cam.shutter_duration = 2;
 
@@ -144,20 +146,12 @@ void twoSpheres(std::ofstream& out) {
     auto checker = make_shared<checker_texture>(0.32, color(.2, .3, .1), color(.9, .9, .9));
     world.add(make_shared<Sphere>(point3(0, -1000, 0), 1000, make_shared<lambertian>(checker)));
  
-    Camera cam;
-
-    cam.aspect_ratio = 1;
-    cam.image_width = 200;
-    cam.samples_per_pixel = 5;
     cam.max_depth = 2;
-    cam.samplingMethod = SamplingMethod::SuperSampling;
 
     cam.vfov = 90;
     cam.lookfrom = point3(1.5, 2, 2);
     cam.lookat = point3(0, 0, -1);
-    cam.vup = vec3(0, 1, 0);
 
-    cam.defocus_angle = 0.0;
     cam.focus_dist = 3.4;
     cam.shutter_duration = 2;
 
@@ -171,20 +165,12 @@ void two_perlin_spheres(std::ofstream& out) {
     auto pertext = make_shared<NoiseTexture>(4,0.5);
     world.add(make_shared<Sphere>(point3(0, -1000, 0), 1000, make_shared<lambertian>(pertext)));
     world.add(make_shared<Sphere>(point3(0, 2, 0), 2, make_shared<lambertian>(pertext)));
-
-    Camera cam;
-
-    cam.aspect_ratio = 16.0 / 9.0;
-    cam.image_width = 400;
-    cam.samples_per_pixel = 10;
+    
     cam.max_depth = 20;
 
     cam.vfov = 20;
     cam.lookfrom = point3(13, 2, 3);
     cam.lookat = point3(0, 0, 0);
-    cam.vup = vec3(0, 1, 0);
-
-    cam.defocus_angle = 0;
 
     cam.render(out,world);
 }
@@ -211,20 +197,12 @@ void cornell_smoke(std::ofstream& out) {
     //world.add(make_shared<Cube>(point3(0, 0, 0), point3(1000, 1000, 1000), red));
     world.add(make_shared<ConstantMedium>(box1, 0.1, color(1, 1, 1)));
     //world.add(make_shared<ConstantMedium>(box2, 0.01, color(1, 1, 1)));
-    Camera cam;
 
-    cam.aspect_ratio = 16.0 / 9.0;
-    cam.image_width = 400;
-    cam.samples_per_pixel = 100;
     cam.max_depth = 40;
-    cam.background = color(0, 0, 0);
 
     cam.vfov = 40;
     cam.lookfrom = point3(278, 278, -800);
     cam.lookat = point3(278, 278, 0);
-    cam.vup = vec3(0, 1, 0);
-
-    cam.defocus_angle = 0;
 
     cam.render(out, world);
 }
@@ -239,33 +217,51 @@ void simple_light(std::ofstream& out) {
     auto difflight = make_shared<DiffuseLight>(color(4, 4, 4));
     world.add(make_shared<Cube>(point3(3, 1, -2), vec3(2, 2, 2), difflight));
 
-    Camera cam;
-
-    cam.aspect_ratio = 16.0 / 9.0;
-    cam.image_width = 400;
-    cam.samples_per_pixel = 20;
     cam.max_depth = 20;
-    cam.background = color(0, 0, 0);
 
     cam.vfov = 20;
     cam.lookfrom = point3(26, 3, 6);
     cam.lookat = point3(0, 2, 0);
-    cam.vup = vec3(0, 1, 0);
-
-    cam.defocus_angle = 0;
 
     cam.render(out, world);
 }
 
 int main() {
 
+    string imageNameList[] = {
+        "twoSpheres",
+        "randomSpheres",
+        "earth",
+        "two_perlin_spheres",
+        "simple_light",
+        "cornell_smoke"
+    };
+    unsigned int numImage = 6;
+
+    for (unsigned int i = 0; i < numImage; i++) {
+        std::cout << i << " : " << imageNameList[i] << std::endl;
+    }
+
+    unsigned int id = 1;
+    string input;
+    std::cin >> input;
+
+    id = stoi(input);
+
+    if ( id < 1 or id >= numImage)
+        throw std::runtime_error( "Image ID out of range" );
+    
+    string imagePath = "./output/" + imageNameList[id-1] + ".ppm";
+
+    std::ofstream out(imagePath);
+
     time_t start = time(NULL);
 
-    std::ofstream out("./output/test_img.ppm");
+    setupCamera();
 
-    switch (5) {
-        case 1: randomSpheres(out);         break;
-        case 2: twoSpheres(out);            break;
+    switch (id) {
+        case 1: twoSpheres(out);            break;
+        case 2: randomSpheres(out);         break;
         case 3: earth(out);                 break;
         case 4: two_perlin_spheres(out);    break;
         case 5: simple_light(out);          break;
@@ -275,6 +271,7 @@ int main() {
     out.close();
    
     time_t spendTime = time(NULL) - start;
+
     std::cout << "Total time used " << spendTime << std::endl;
 
 }

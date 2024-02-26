@@ -22,11 +22,6 @@ public:
         bbox = aabb(_center - _size/2, _center + _size/2);
     }
 
-    ~Cube() {
-        std::cout << "del" << std::endl;
-        //delete[] planes;
-        std::cout << "dell" << std::endl;
-    }
     bool hit(const ray& r, interval rayT, HitRecord& rec) const override {
 
         //  For each planes, check if ray is intersect or not
