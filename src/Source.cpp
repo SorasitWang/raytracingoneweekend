@@ -238,8 +238,8 @@ int main() {
     };
     unsigned int numImage = 6;
 
-    for (unsigned int i = 0; i < numImage; i++) {
-        std::cout << i << " : " << imageNameList[i] << std::endl;
+    for (unsigned int i = 1; i <= numImage; i++) {
+        std::cout << i << " : " << imageNameList[i-1] << std::endl;
     }
 
     unsigned int id = 1;
@@ -248,7 +248,7 @@ int main() {
 
     id = stoi(input);
 
-    if ( id < 1 or id >= numImage)
+    if ( id < 1 || id > numImage)
         throw std::runtime_error( "Image ID out of range" );
     
     string imagePath = "./output/" + imageNameList[id-1] + ".ppm";
